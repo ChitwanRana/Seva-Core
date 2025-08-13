@@ -1,0 +1,1110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Seva Health Assistant</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary-color: #3a86ff;
+            --primary-light: #cfe2ff;
+            --secondary-color: #30638e;
+            --accent-color: #4cc9f0;
+            --success-color: #43aa8b;
+            --warning-color: #f9c74f;
+            --danger-color: #f94144;
+            --light-bg: #f8f9fa;
+            --dark-text: #212529;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background-color: #f5f8fa;
+            color: var(--dark-text);
+            line-height: 1.6;
+            min-height: 100vh;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            padding: 1.5rem 0;
+            margin-bottom: 2rem;
+            border-radius: 0 0 1rem 1rem;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            position: relative;
+        }
+        
+        .header::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-image: url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI1IiBoZWlnaHQ9IjUiPgo8cmVjdCB3aWR0aD0iNSIgaGVpZ2h0PSI1IiBmaWxsPSIjZmZmIiBmaWxsLW9wYWNpdHk9IjAuMDUiPjwvcmVjdD4KPC9zdmc+');
+            opacity: 0.2;
+            border-radius: 0 0 1rem 1rem;
+            z-index: 0;
+        }
+        
+        .header .container {
+            position: relative;
+            z-index: 1;
+        }
+        
+        .header h1 {
+            font-weight: 700;
+            font-size: 2.5rem;
+        }
+        
+        .header p {
+            opacity: 0.9;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        
+        .app-container {
+            background-color: white;
+            border-radius: 1rem;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.05);
+            padding: 0;
+            overflow: hidden;
+            margin-bottom: 2rem;
+        }
+        
+        .progress-bar {
+            height: 0.5rem;
+            background-color: var(--light-bg);
+        }
+        
+        .progress-bar .progress {
+            height: 100%;
+            width: 0;
+            background: linear-gradient(90deg, var(--primary-color), var(--accent-color));
+            transition: width 0.5s ease;
+        }
+        
+        .step {
+            display: none;
+            padding: 2rem;
+        }
+        
+        .step.active {
+            display: block;
+            animation: fadeIn 0.4s;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .step-title {
+            display: flex;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+        
+        .step-number {
+            background-color: var(--primary-light);
+            color: var(--primary-color);
+            width: 2rem;
+            height: 2rem;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            margin-right: 0.75rem;
+        }
+        
+        .step-heading {
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin: 0;
+            color: var(--secondary-color);
+        }
+        
+        .symptom-input {
+            position: relative;
+        }
+        
+        .symptom-input .form-control {
+            padding-right: 3rem;
+            border-radius: 0.75rem;
+            border: 1px solid #dee2e6;
+            padding: 0.75rem 1rem;
+            font-size: 1rem;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.02);
+            transition: all 0.2s;
+        }
+        
+        .symptom-input .form-control:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(58, 134, 255, 0.15);
+        }
+        
+        .btn-analyze {
+            position: absolute;
+            right: 0.75rem;
+            top: 50%;
+            transform: translateY(-50%);
+            border: none;
+            background: none;
+            color: var(--primary-color);
+            transition: all 0.2s;
+        }
+        
+        .btn-analyze:hover {
+            color: var(--secondary-color);
+        }
+        
+        .symptom-checkbox {
+            background-color: white;
+            border: 1px solid #dee2e6;
+            border-radius: 0.5rem;
+            padding: 0.75rem 1rem;
+            margin-bottom: 0.75rem;
+            transition: all 0.2s;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+        }
+        
+        .symptom-checkbox:hover {
+            border-color: var(--primary-color);
+            background-color: var(--primary-light);
+            transform: translateY(-2px);
+            box-shadow: 0 3px 10px rgba(0,0,0,0.05);
+        }
+        
+        .symptom-checkbox input {
+            margin-right: 10px;
+        }
+        
+        .confidence-badge {
+            margin-left: auto;
+            padding: 0.25rem 0.5rem;
+            border-radius: 1rem;
+            font-size: 0.75rem;
+            font-weight: 600;
+            background-color: rgba(58, 134, 255, 0.1);
+            color: var(--primary-color);
+        }
+        
+        .btn-action {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 0.75rem;
+            padding: 0.75rem 1.5rem;
+            font-weight: 500;
+            transition: all 0.2s;
+        }
+        
+        .btn-action:hover {
+            background-color: var(--secondary-color);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+            color: white;
+        }
+        
+        .btn-back {
+            background-color: #f8f9fa;
+            color: #6c757d;
+            border: none;
+            border-radius: 0.75rem;
+            padding: 0.75rem 1.5rem;
+            font-weight: 500;
+            transition: all 0.2s;
+        }
+        
+        .btn-back:hover {
+            background-color: #e9ecef;
+            color: #495057;
+        }
+        
+        .selected-symptoms {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            margin-top: 1rem;
+        }
+        
+        .symptom-pill {
+            background-color: var(--primary-light);
+            color: var(--primary-color);
+            border-radius: 1rem;
+            padding: 0.35rem 0.75rem;
+            font-size: 0.85rem;
+            font-weight: 500;
+            display: inline-flex;
+            align-items: center;
+        }
+        
+        .remove-symptom {
+            margin-left: 0.5rem;
+            opacity: 0.5;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .remove-symptom:hover {
+            opacity: 1;
+            color: var(--danger-color);
+        }
+        
+        .result-card {
+            border: none;
+            border-radius: 0.75rem;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.05);
+            margin-bottom: 1rem;
+            overflow: hidden;
+        }
+        
+        .result-card .card-header {
+            background-color: white;
+            border-bottom: 1px solid rgba(0,0,0,0.05);
+            padding: 1rem 1.25rem;
+        }
+        
+        .result-card .card-body {
+            padding: 1.25rem;
+        }
+        
+        .prediction-bar-container {
+            height: 1.5rem;
+            background-color: #f8f9fa;
+            border-radius: 0.75rem;
+            overflow: hidden;
+            margin-bottom: 1.5rem;
+        }
+        
+        .prediction-bar {
+            height: 100%;
+            background: linear-gradient(90deg, var(--primary-color), var(--accent-color));
+            border-radius: 0.75rem;
+            transition: width 1s ease-out;
+        }
+        
+        .prediction-high .prediction-bar {
+            background: linear-gradient(90deg, var(--warning-color), var(--danger-color));
+        }
+        
+        .prediction-medium .prediction-bar {
+            background: linear-gradient(90deg, var(--warning-color), var(--warning-color));
+        }
+        
+        .prediction-low .prediction-bar {
+            background: linear-gradient(90deg, var(--success-color), var(--primary-color));
+        }
+        
+        .disclaimer {
+            background-color: #fff3cd;
+            border-left: 4px solid var(--warning-color);
+            padding: 1rem;
+            border-radius: 0.5rem;
+            margin-top: 1.5rem;
+            font-size: 0.9rem;
+        }
+        
+        .disclaimer i {
+            color: var(--warning-color);
+            margin-right: 0.5rem;
+        }
+        
+        .selection-controls {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 1rem;
+        }
+        
+        .selection-controls button {
+            background: none;
+            border: none;
+            color: var(--primary-color);
+            font-size: 0.9rem;
+            padding: 0.25rem 0.5rem;
+            border-radius: 0.25rem;
+            cursor: pointer;
+        }
+        
+        .selection-controls button:hover {
+            background-color: var(--primary-light);
+        }
+        
+        .empty-state {
+            text-align: center;
+            padding: 2rem;
+        }
+        
+        .empty-state i {
+            font-size: 3rem;
+            color: #dee2e6;
+            margin-bottom: 1rem;
+        }
+        
+        .empty-state p {
+            color: #6c757d;
+            margin: 0;
+        }
+        
+        .loading {
+            display: inline-block;
+            width: 1rem;
+            height: 1rem;
+            border: 2px solid rgba(255,255,255,0.3);
+            border-radius: 50%;
+            border-top-color: white;
+            animation: spin 1s ease-in-out infinite;
+            margin-right: 0.5rem;
+            vertical-align: middle;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        .btn-loading .btn-text {
+            display: none;
+        }
+        
+        .btn-loading .loading {
+            display: inline-block;
+        }
+        
+        .btn:not(.btn-loading) .loading {
+            display: none;
+        }
+        
+        footer {
+            text-align: center;
+            padding: 1.5rem 0;
+            color: #6c757d;
+            font-size: 0.9rem;
+        }
+        
+        @media (max-width: 767.98px) {
+            .header {
+                padding: 1rem 0;
+                margin-bottom: 1rem;
+            }
+            
+            .header h1 {
+                font-size: 1.75rem;
+            }
+            
+            .step {
+                padding: 1.25rem;
+            }
+            
+            .btn-action, .btn-back {
+                padding: 0.6rem 1.2rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="container">
+            <div class="text-center">
+                <h1><i class="fas fa-heartbeat me-2"></i>Seva Health Assistant</h1>
+                <p>Describe your symptoms and get AI-powered health insights</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="app-container">
+            <div class="progress-bar">
+                <div class="progress" id="progressBar"></div>
+            </div>
+            
+            <!-- Step 1: Enter Symptoms -->
+            <div class="step active" id="step1">
+                <div class="step-title">
+                    <div class="step-number">1</div>
+                    <h3 class="step-heading">Describe Your Symptoms</h3>
+                </div>
+                <p>Tell us about how you're feeling in your own words.</p>
+                
+                <div class="symptom-input mb-4">
+                    <input type="text" class="form-control" id="symptomInput" placeholder="Example: I have a headache and fever since yesterday">
+                    <button class="btn-analyze" id="analyzeBtn">
+                        <span class="loading"></span>
+                        <span class="btn-text"><i class="fas fa-search"></i></span>
+                    </button>
+                </div>
+                
+                <!-- Common Symptoms Buttons -->
+                <div class="common-symptoms mt-2 mb-4">
+                    <p class="small text-muted mb-2">Common symptoms:</p>
+                    <div class="d-flex flex-wrap gap-2">
+                        <button class="btn btn-sm btn-outline-secondary" onclick="quickAddSymptom('headache')">Headache</button>
+                        <button class="btn btn-sm btn-outline-secondary" onclick="quickAddSymptom('fever')">Fever</button>
+                        <button class="btn btn-sm btn-outline-secondary" onclick="quickAddSymptom('cough')">Cough</button>
+                        <button class="btn btn-sm btn-outline-secondary" onclick="quickAddSymptom('sore throat')">Sore throat</button>
+                        <button class="btn btn-sm btn-outline-secondary" onclick="quickAddSymptom('chest pain')">Chest pain</button>
+                        <button class="btn btn-sm btn-outline-secondary" onclick="quickAddSymptom('stomach pain')">Stomach pain</button>
+                    </div>
+                </div>
+                
+                <div class="d-flex justify-content-end">
+                    <button class="btn btn-action" id="goToStep2Btn" disabled>
+                        Continue <i class="fas fa-arrow-right ms-2"></i>
+                    </button>
+                </div>
+                
+                <div id="matchesError" class="alert alert-danger mt-3" style="display: none;"></div>
+                
+                <div class="empty-state" id="step1EmptyState">
+                    <i class="fas fa-keyboard"></i>
+                    <p>Enter your symptoms and click the search icon</p>
+                </div>
+            </div>
+            
+            <!-- Step 2: Select Matching Symptoms -->
+            <div class="step" id="step2">
+                <div class="step-title">
+                    <div class="step-number">2</div>
+                    <h3 class="step-heading">Select Your Symptoms</h3>
+                </div>
+                <p>Select all symptoms that apply to you for a more accurate analysis.</p>
+                
+                <div class="selection-controls">
+                    <span><i class="fas fa-filter me-1"></i> <span id="symptomsCount">0</span> symptoms found</span>
+                    <div>
+                        <button onclick="selectAllSymptoms(true)"><i class="fas fa-check-square me-1"></i> Select All</button>
+                        <button onclick="selectAllSymptoms(false)"><i class="fas fa-square me-1"></i> Clear All</button>
+                    </div>
+                </div>
+                
+                <div id="symptomCheckboxes" class="mb-4">
+                    <div class="empty-state">
+                        <i class="fas fa-search"></i>
+                        <p>No symptoms found. Try describing them differently.</p>
+                    </div>
+                </div>
+                
+                <div class="d-flex justify-content-between">
+                    <button class="btn btn-back" id="backToStep1Btn">
+                        <i class="fas fa-arrow-left me-2"></i> Back
+                    </button>
+                    <button class="btn btn-action" id="goToStep3Btn">
+                        <span class="loading"></span>
+                        <span class="btn-text">Get Health Insights <i class="fas fa-arrow-right ms-2"></i></span>
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Step 3: View Results -->
+            <div class="step" id="step3">
+                <div class="step-title">
+                    <div class="step-number">3</div>
+                    <h3 class="step-heading">Health Insights</h3>
+                </div>
+                <p>Based on your selected symptoms, here are possible conditions to discuss with a healthcare provider.</p>
+                
+                <div class="mb-3">
+                    <h6>Selected Symptoms:</h6>
+                    <div id="selectedSymptomsList" class="selected-symptoms"></div>
+                </div>
+                
+                <div id="predictionResults">
+                    <div class="empty-state">
+                        <i class="fas fa-spinner fa-spin"></i>
+                        <p>Analyzing your symptoms...</p>
+                    </div>
+                </div>
+                
+                <div class="d-flex justify-content-end mb-3">
+                    <button class="btn btn-outline-secondary me-2" onclick="exportResults('pdf')">
+                        <i class="fas fa-file-pdf me-1"></i> Save as PDF
+                    </button>
+                    <button class="btn btn-outline-secondary" onclick="shareResults()">
+                        <i class="fas fa-share-alt me-1"></i> Share
+                    </button>
+                </div>
+                
+                <div class="disclaimer">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    <strong>Disclaimer:</strong> This tool provides general information only and is not a substitute for professional medical advice. Always consult with a healthcare provider for diagnosis and treatment.
+                </div>
+                
+                <div class="d-flex justify-content-between mt-4">
+                    <button class="btn btn-back" id="backToStep2Btn">
+                        <i class="fas fa-arrow-left me-2"></i> Back
+                    </button>
+                    <button class="btn btn-action" id="startOverBtn">
+                        <i class="fas fa-redo me-2"></i> Start Over
+                    </button>
+                </div>
+            </div>
+        </div>
+        
+        <footer>
+            <p>&copy; 2025 Seva Health Assistant | AI-Powered Health Insights</p>
+        </footer>
+    </div>
+
+    <!-- Bootstrap JS Bundle with Popper -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        const BASE_URL = "http://127.0.0.1:8000"; // Change to your Django backend URL
+        let allMatchedSymptoms = []; // Store all matched symptoms
+        let currentStep = 1;
+        
+        // DOM Elements
+        const symptomInput = document.getElementById('symptomInput');
+        const analyzeBtn = document.getElementById('analyzeBtn');
+        const goToStep2Btn = document.getElementById('goToStep2Btn');
+        const backToStep1Btn = document.getElementById('backToStep1Btn');
+        const goToStep3Btn = document.getElementById('goToStep3Btn');
+        const backToStep2Btn = document.getElementById('backToStep2Btn');
+        const startOverBtn = document.getElementById('startOverBtn');
+        const progressBar = document.getElementById('progressBar');
+        
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            updateProgressBar();
+            setupEventListeners();
+        });
+        
+        // Debounce function to prevent rapid firing of the same event
+        function debounce(func, wait) {
+            let timeout;
+            return function() {
+                const context = this;
+                const args = arguments;
+                clearTimeout(timeout);
+                timeout = setTimeout(() => func.apply(context, args), wait);
+            };
+        }
+        
+        function setupEventListeners() {
+            // Analyze button click
+            analyzeBtn.addEventListener('click', getMatches);
+            
+            // Enter key in symptom input
+            symptomInput.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    getMatches();
+                }
+            });
+            
+            // Auto-analyze after typing stops (with 500ms debounce)
+            symptomInput.addEventListener('input', debounce(function() {
+                if (this.value.length > 2) { // Only trigger if at least 3 characters
+                    getMatches();
+                }
+            }, 500));
+            
+            // Navigation buttons
+            goToStep2Btn.addEventListener('click', () => navigateToStep(2));
+            backToStep1Btn.addEventListener('click', () => navigateToStep(1));
+            goToStep3Btn.addEventListener('click', getSelectedSymptomsAndPredict);
+            backToStep2Btn.addEventListener('click', () => navigateToStep(2));
+            startOverBtn.addEventListener('click', resetApp);
+        }
+        
+        // Navigation
+        function navigateToStep(step) {
+            document.querySelectorAll('.step').forEach(el => el.classList.remove('active'));
+            document.getElementById(`step${step}`).classList.add('active');
+            currentStep = step;
+            updateProgressBar();
+            
+            if (step === 2) {
+                updateSymptomsCount();
+            }
+            else if (step === 3) {
+                updateSelectedSymptomsList();
+            }
+        }
+        
+        function updateProgressBar() {
+            const progress = ((currentStep - 1) / 2) * 100;
+            progressBar.style.width = `${progress}%`;
+        }
+        
+        // Step 1: Get Matches
+        async function getMatches() {
+            const userInput = symptomInput.value.trim();
+            if (!userInput) {
+                showError('matchesError', 'Please enter your symptoms');
+                return;
+            }
+            
+            setButtonLoading(analyzeBtn, true);
+            hideElement('step1EmptyState');
+            hideError('matchesError');
+            
+            try {
+                const res = await fetch(`${BASE_URL}/getMatches/?user_input=${encodeURIComponent(userInput)}`);
+                const data = await res.json();
+                
+                // Store the matched symptoms globally
+                allMatchedSymptoms = data.matched_symptoms || [];
+                
+                // Enable/disable continue button based on results
+                goToStep2Btn.disabled = allMatchedSymptoms.length === 0;
+                
+                if (allMatchedSymptoms.length === 0) {
+                    showError('matchesError', 'No symptoms matched. Please try describing your symptoms differently.');
+                    showElement('step1EmptyState');
+                }
+                
+                // Update UI for step 2
+                renderSymptomCheckboxes();
+                
+            } catch (err) {
+                console.error(err);
+                showError('matchesError', 'Error analyzing symptoms. Please try again.');
+            } finally {
+                setButtonLoading(analyzeBtn, false);
+            }
+        }
+        
+        // Categorize symptoms into basic categories
+        function categorizeSymptoms(symptoms) {
+            const categories = {
+                "Pain": [],
+                "Respiratory": [],
+                "Digestive": [],
+                "Neurological": [],
+                "Skin": [],
+                "General": []
+            };
+            
+            symptoms.forEach(symptom => {
+                const name = symptom[0].toLowerCase();
+                
+                if (name.includes("pain") || name.includes("ache") || name.includes("hurt")) {
+                    categories["Pain"].push(symptom);
+                } else if (name.includes("breath") || name.includes("cough") || name.includes("chest") || name.includes("nose")) {
+                    categories["Respiratory"].push(symptom);
+                } else if (name.includes("stomach") || name.includes("nausea") || name.includes("vomit") || name.includes("diarrhea")) {
+                    categories["Digestive"].push(symptom);
+                } else if (name.includes("head") || name.includes("dizz") || name.includes("confusion") || name.includes("memory")) {
+                    categories["Neurological"].push(symptom);
+                } else if (name.includes("rash") || name.includes("itch") || name.includes("skin")) {
+                    categories["Skin"].push(symptom);
+                } else {
+                    categories["General"].push(symptom);
+                }
+            });
+            
+            return categories;
+        }
+        
+        // Render symptom checkboxes in step 2
+        function renderSymptomCheckboxes() {
+            const container = document.getElementById('symptomCheckboxes');
+            
+            if (allMatchedSymptoms.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <i class="fas fa-search"></i>
+                        <p>No symptoms found. Try describing them differently.</p>
+                    </div>`;
+                return;
+            }
+            
+            // Categorize symptoms
+            const categorizedSymptoms = categorizeSymptoms(allMatchedSymptoms);
+            
+            let html = '';
+            
+            // Render symptoms by category
+            Object.keys(categorizedSymptoms).forEach(category => {
+                const symptoms = categorizedSymptoms[category];
+                
+                if (symptoms.length > 0) {
+                    html += `
+                        <div class="symptom-category mb-3">
+                            <h6><i class="fas fa-tag me-2"></i>${category} (${symptoms.length})</h6>
+                            <div class="ps-3">`;
+                    
+                    symptoms.forEach((symptom, index) => {
+                        const [name, confidence] = symptom;
+                        const confidencePercent = (confidence * 100).toFixed(1);
+                        const originalIndex = allMatchedSymptoms.findIndex(s => s[0] === name);
+                        
+                        html += `
+                            <div class="symptom-checkbox">
+                                <input type="checkbox" id="symptom-${originalIndex}" class="symptom-checkbox-input" checked>
+                                <label for="symptom-${originalIndex}">${name}</label>
+                                <span class="confidence-badge">${confidencePercent}%</span>
+                            </div>`;
+                    });
+                    
+                    html += `
+                            </div>
+                        </div>`;
+                }
+            });
+            
+            container.innerHTML = html;
+        }
+        
+        // Update symptoms count in step 2
+        function updateSymptomsCount() {
+            const count = document.querySelectorAll('.symptom-checkbox-input:checked').length;
+            document.getElementById('symptomsCount').textContent = count;
+        }
+        
+        // Select/deselect all symptoms
+        function selectAllSymptoms(selected) {
+            const checkboxes = document.querySelectorAll('.symptom-checkbox-input');
+            checkboxes.forEach(checkbox => {
+                checkbox.checked = selected;
+            });
+            updateSymptomsCount();
+        }
+        
+        // Update selected symptoms list in step 3
+        function updateSelectedSymptomsList() {
+            const container = document.getElementById('selectedSymptomsList');
+            const checkboxes = document.querySelectorAll('.symptom-checkbox-input');
+            
+            let html = '';
+            let selectedCount = 0;
+            
+            checkboxes.forEach((checkbox, index) => {
+                if (checkbox.checked && index < allMatchedSymptoms.length) {
+                    const symptomName = allMatchedSymptoms[index][0];
+                    html += `
+                        <div class="symptom-pill">
+                            ${symptomName}
+                        </div>`;
+                    selectedCount++;
+                }
+            });
+            
+            if (selectedCount === 0) {
+                html = '<p class="text-muted">No symptoms selected</p>';
+            }
+            
+            container.innerHTML = html;
+        }
+        
+        // Get selected symptoms and predict
+        function getSelectedSymptomsAndPredict() {
+            const checkboxes = document.querySelectorAll('.symptom-checkbox-input');
+            const selectedSymptoms = [];
+            
+            checkboxes.forEach((checkbox, index) => {
+                if (checkbox.checked && index < allMatchedSymptoms.length) {
+                    selectedSymptoms.push(allMatchedSymptoms[index]);
+                }
+            });
+            
+            if (selectedSymptoms.length === 0) {
+                alert('Please select at least one symptom');
+                return;
+            }
+            
+            setButtonLoading(goToStep3Btn, true);
+            
+            // Navigate to step 3 and make prediction
+            navigateToStep(3);
+            predict(selectedSymptoms);
+        }
+        
+        // Make prediction request
+        async function predict(selectedSymptoms) {
+            try {
+                setButtonLoading(goToStep3Btn, true);
+                
+                console.log("Sending prediction request with symptoms:", selectedSymptoms);
+                
+                const res = await fetch(`${BASE_URL}/predict/`, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ matched_symptoms: selectedSymptoms })
+                });
+                
+                const data = await res.json();
+                console.log("Received prediction response:", data);
+                
+                if (data.error) {
+                    document.getElementById('predictionResults').innerHTML = `
+                        <div class="alert alert-danger">
+                            <i class="fas fa-exclamation-circle me-2"></i>
+                            Error: ${data.error}
+                        </div>`;
+                    return;
+                }
+                
+                // Check if predictions exist
+                if (!data.predictions || !Array.isArray(data.predictions) || data.predictions.length === 0) {
+                    document.getElementById('predictionResults').innerHTML = `
+                        <div class="alert alert-warning">
+                            <i class="fas fa-exclamation-triangle me-2"></i>
+                            No predictions were returned
+                        </div>`;
+                    return;
+                }
+                
+                // Render predictions
+                renderPredictionResults(data.predictions);
+                
+            } catch (err) {
+                console.error("Prediction error:", err);
+                document.getElementById('predictionResults').innerHTML = `
+                    <div class="alert alert-danger">
+                        <i class="fas fa-exclamation-circle me-2"></i>
+                        Error making predictions. Please try again.
+                    </div>`;
+            } finally {
+                setButtonLoading(goToStep3Btn, false);
+            }
+        }
+        
+        // Update the rendering function
+        function renderPredictionResults(predictions) {
+            const container = document.getElementById('predictionResults');
+            
+            if (!predictions || predictions.length === 0) {
+                container.innerHTML = `
+                    <div class="alert alert-info">
+                        <i class="fas fa-info-circle me-2"></i>
+                        No prediction results returned
+                    </div>`;
+                return;
+            }
+            
+            // Sort by probability (highest first)
+            const sortedPredictions = [...predictions]
+                .sort((a, b) => b.probability - a.probability);
+            
+            let html = '<div class="row">';
+            
+            sortedPredictions.forEach((item) => {
+                const probability = item.probability * 100;
+                let riskLevel, riskClass, description = "";
+                
+                // Determine risk level
+                if (probability > 70) {
+                    riskLevel = "High";
+                    riskClass = "prediction-high";
+                } else if (probability > 40) {
+                    riskLevel = "Medium";
+                    riskClass = "prediction-medium";
+                } else {
+                    riskLevel = "Low";
+                    riskClass = "prediction-low";
+                }
+                
+                // Enhanced condition descriptions based on condition type
+                if (item.name.includes("Joint") || item.name.includes("Arthritis") || item.name.includes("Osteo")) {
+                    description = "<p class='text-muted small mt-2'>Related to joint inflammation or degeneration. May involve pain, stiffness, or reduced mobility.</p>";
+                } else if (item.name.includes("Vascular") || item.name.includes("Edema") || item.name.includes("Thrombosis")) {
+                    description = "<p class='text-muted small mt-2'>Related to blood vessels or circulation. May involve swelling, pain, or circulation issues.</p>";
+                } else if (item.name.includes("Respiratory") || item.name.includes("Bronchitis")) {
+                    description = "<p class='text-muted small mt-2'>Related to breathing and lung function. May involve coughing, shortness of breath, or congestion.</p>";
+                } else if (item.name.includes("Cardiovascular") || item.name.includes("Heart")) {
+                    description = "<p class='text-muted small mt-2'>Related to heart and blood vessel function. May affect circulation or heart function.</p>";
+                } else if (item.name.includes("Depression") || item.name.includes("Mood")) {
+                    description = "<p class='text-muted small mt-2'>Related to mental health and emotional well-being. May involve persistent feelings of sadness or loss of interest.</p>";
+                }
+                
+                html += `
+                    <div class="col-md-6 mb-3">
+                        <div class="result-card">
+                            <div class="card-header">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <strong>${item.name}</strong>
+                                    <span class="badge bg-${riskClass === 'prediction-high' ? 'danger' : 
+                                        riskClass === 'prediction-medium' ? 'warning' : 'primary'}">${riskLevel}</span>
+                                </div>
+                            </div>
+                            <div class="card-body">
+                                <div class="prediction-bar-container ${riskClass}">
+                                    <div class="prediction-bar" style="width: ${probability}%;"></div>
+                                </div>
+                                <div class="text-end mb-2">
+                                    <strong>${probability.toFixed(1)}%</strong> probability
+                                </div>
+                                ${description}
+                                <div class="mt-3">
+                                    <a href="https://www.mayoclinic.org/search/search-results?q=${encodeURIComponent(item.name)}" 
+                                       class="btn btn-sm btn-outline-primary" 
+                                       target="_blank">
+                                       <i class="fas fa-external-link-alt me-1"></i> Learn more
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>`;
+            });
+            
+            html += '</div>';
+            container.innerHTML = html;
+            
+            // Animate the prediction bars
+            setTimeout(() => {
+                document.querySelectorAll('.prediction-bar').forEach(bar => {
+                    const width = bar.style.width;
+                    bar.style.width = '0%';
+                    setTimeout(() => { bar.style.width = width; }, 50);
+                });
+            }, 100);
+        }
+        
+        // Reset the app to initial state
+        function resetApp() {
+            symptomInput.value = '';
+            allMatchedSymptoms = [];
+            navigateToStep(1);
+            showElement('step1EmptyState');
+            goToStep2Btn.disabled = true;
+            hideError('matchesError');
+        }
+        
+        // Helper functions
+        function showError(elementId, message) {
+            const element = document.getElementById(elementId);
+            element.textContent = message;
+            element.style.display = 'block';
+        }
+        
+        function hideError(elementId) {
+            document.getElementById(elementId).style.display = 'none';
+        }
+        
+        function showElement(elementId) {
+            document.getElementById(elementId).style.display = 'block';
+        }
+        
+        function hideElement(elementId) {
+            document.getElementById(elementId).style.display = 'none';
+        }
+        
+        function setButtonLoading(button, isLoading) {
+            if (isLoading) {
+                button.classList.add('btn-loading');
+                button.disabled = true;
+            } else {
+                button.classList.remove('btn-loading');
+                button.disabled = false;
+            }
+        }
+
+        // Quick add symptom from common symptoms buttons
+        function quickAddSymptom(symptom) {
+            const currentInput = symptomInput.value.trim();
+            symptomInput.value = currentInput ? `${currentInput}, ${symptom}` : symptom;
+            getMatches(); // Automatically trigger search
+        }
+
+        // Export results as PDF or print
+        function exportResults(format) {
+            // Get selected symptoms and predictions
+            const selectedSymptoms = Array.from(document.querySelectorAll('.symptom-pill'))
+                .map(pill => pill.textContent.trim());
+            
+            const predictions = Array.from(document.querySelectorAll('.result-card'))
+                .map(card => ({
+                    name: card.querySelector('.card-header strong').textContent,
+                    risk: card.querySelector('.badge').textContent,
+                    probability: card.querySelector('.text-end strong').textContent
+                }));
+            
+            // Prepare content for export
+            const content = {
+                date: new Date().toLocaleString(),
+                symptoms: selectedSymptoms,
+                predictions: predictions
+            };
+            
+            // Print or save as PDF
+            if (format === 'pdf') {
+                // Create a printable view
+                const printWindow = window.open('', '_blank');
+                printWindow.document.write(`
+                    <html>
+                        <head>
+                            <title>Health Assessment - ${content.date}</title>
+                            <style>
+                                body { font-family: Arial, sans-serif; max-width: 800px; margin: 0 auto; padding: 20px; }
+                                h1 { color: #3a86ff; }
+                                h2 { margin-top: 20px; color: #4a4a4a; }
+                                .disclaimer { font-style: italic; margin-top: 30px; }
+                                table { border-collapse: collapse; width: 100%; }
+                                th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+                                th { background-color: #f2f2f2; }
+                            </style>
+                        </head>
+                        <body>
+                            <h1>Seva Health Assessment</h1>
+                            <p>Date: ${content.date}</p>
+                            
+                            <h2>Selected Symptoms</h2>
+                            <ul>
+                                ${content.symptoms.map(s => `<li>${s}</li>`).join('')}
+                            </ul>
+                            
+                            <h2>Potential Conditions</h2>
+                            <table>
+                                <tr>
+                                    <th>Condition</th>
+                                    <th>Risk Level</th>
+                                    <th>Probability</th>
+                                </tr>
+                                ${content.predictions.map(p => `
+                                    <tr>
+                                        <td>${p.name}</td>
+                                        <td>${p.risk}</td>
+                                        <td>${p.probability}</td>
+                                    </tr>
+                                `).join('')}
+                            </table>
+                            
+                            <div class="disclaimer">
+                                <p><strong>Disclaimer:</strong> This assessment is for informational purposes only and is not a substitute for professional medical advice. Always consult with a healthcare provider for diagnosis and treatment.</p>
+                            </div>
+                        </body>
+                    </html>
+                `);
+                
+                setTimeout(() => {
+                    printWindow.print();
+                }, 500);
+            }
+        }
+
+        // Share results via Web Share API
+        function shareResults() {
+            // Check if Web Share API is available
+            if (navigator.share) {
+                // Get selected symptoms and top condition
+                const selectedSymptoms = Array.from(document.querySelectorAll('.symptom-pill'))
+                    .map(pill => pill.textContent.trim())
+                    .join(', ');
+                
+                const topCondition = document.querySelector('.result-card .card-header strong')?.textContent || 'Unknown';
+                
+                // Share content
+                navigator.share({
+                    title: 'Seva Health Assessment',
+                    text: `My symptoms (${selectedSymptoms}) might indicate ${topCondition}. Check your symptoms on Seva Health Assistant.`,
+                    url: window.location.href
+                })
+                .catch(err => {
+                    alert('Error sharing results');
+                    console.error(err);
+                });
+            } else {
+                // Fallback for browsers that don't support Web Share API
+                alert('Sharing not supported on this browser. You can save as PDF instead.');
+            }
+        }
+    </script>
+</body>
+</html>
